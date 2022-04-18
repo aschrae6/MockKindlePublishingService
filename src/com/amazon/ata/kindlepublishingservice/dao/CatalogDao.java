@@ -42,12 +42,33 @@ public class CatalogDao {
         return book;
     }
 
+    /**
+     * Sets the Catalog item corresponding to the provided bookId as inactive, thus removing it from the catalog
+     * Throws a BookNotFoundException if there is no active version for the bookId provided
+     * @param bookId the ID of the book that is to be removed
+     * @return The CatalogItem marked as inactive
+     */
+    public CatalogItemVersion removeBookFromCatalog(String bookId) {
+        CatalogItemVersion bookToRemove;
+
+        try {
+            bookToRemove = getBookFromCatalog(bookId);
+        } catch (BookNotFoundException exception) {
+            throw exception;
+        }
+
+        bookToRemove.setInactive(true);
+        dynamoDbMapper.save(bookToRemove);
+
+        return bookToRemove;
+    }
+
     // Returns null if no version exists for the provided bookId
     private CatalogItemVersion getLatestVersionOfBook(String bookId) {
         CatalogItemVersion book = new CatalogItemVersion();
         book.setBookId(bookId);
 
-        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression()
+        DynamoDBQueryExpression<CatalogItemVersion> queryExpression = new DynamoDBQueryExpression<CatalogItemVersion>()
             .withHashKeyValues(book)
             .withScanIndexForward(false)
             .withLimit(1);
