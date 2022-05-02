@@ -79,8 +79,12 @@ public class PublishingStatusDao {
         return item;
     }
 
-
-
+    /**
+     * Returns all PublishingStatus items that are in the table.
+     * This provides a record of the progress on this publishing request
+     * @param publishingRecordId the ID that corresponds to this publishing request
+     * @return the list of PublishingStatus actions that have been made
+     */
     public List<PublishingStatusItem> getPublishingStatus(String publishingRecordId) {
         PublishingStatusItem item = new PublishingStatusItem();
         item.setPublishingRecordId(publishingRecordId);
@@ -97,25 +101,4 @@ public class PublishingStatusDao {
         }
         return statusItems;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -8,7 +8,7 @@ public final class KindleConversionUtils {
     private KindleConversionUtils(){}
 
     /**
-     * Accepts the text of the book and coverts it to the kindle text format.
+     * Accepts the text of the book and coverts it to the Kindle text format.
      * @param text the text to format
      * @return the formatted text
      */

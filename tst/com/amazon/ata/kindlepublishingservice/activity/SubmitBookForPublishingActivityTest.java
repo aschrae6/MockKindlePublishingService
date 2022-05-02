@@ -1,5 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.activity;
 
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazon.ata.kindlepublishingservice.models.requests.SubmitBookForPublishingRequest;
 import com.amazon.ata.kindlepublishingservice.models.response.SubmitBookForPublishingResponse;
@@ -30,7 +31,11 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class SubmitBookForPublishingActivityTest {
 
     @Mock
+    private BookPublishRequestManager publishRequestManager;
+    @Mock
     private PublishingStatusDao publishingStatusDao;
+    @Mock
+    private CatalogDao catalogDao;
 
     @InjectMocks
     private SubmitBookForPublishingActivity activity;

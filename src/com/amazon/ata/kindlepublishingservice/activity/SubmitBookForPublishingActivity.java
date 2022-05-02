@@ -54,19 +54,19 @@ public class SubmitBookForPublishingActivity {
     public SubmitBookForPublishingResponse execute(SubmitBookForPublishingRequest request) {
         final BookPublishRequest bookPublishRequest = BookPublishRequestConverter.toBookPublishRequest(request);
 
-        // TODO: If there is a book ID in the request, validate it exists in our catalog
+        // If there is a book ID in the request, validate it exists in our catalog
         if (request.getBookId() != null) {
             catalogDao.validateBookExists(request.getBookId());
         }
-        // TODO: Submit the BookPublishRequest for processing
+        // Submit the BookPublishRequest for processing
         publishRequestManager.addBookPublishRequest(bookPublishRequest);
 
-        PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(bookPublishRequest.getPublishingRecordId(),
-                PublishingRecordStatus.QUEUED,
-                bookPublishRequest.getBookId());
+        PublishingStatusItem publishingStatus = publishingStatusDao.setPublishingStatus(
+                bookPublishRequest.getPublishingRecordId(),
+                PublishingRecordStatus.QUEUED, bookPublishRequest.getBookId());
 
         return SubmitBookForPublishingResponse.builder()
-                .withPublishingRecordId(item.getPublishingRecordId())
+                .withPublishingRecordId(publishingStatus.getPublishingRecordId())
                 .build();
     }
 }

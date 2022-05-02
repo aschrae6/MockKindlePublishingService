@@ -29,7 +29,7 @@ public class CatalogDao {
     /**
      * Returns the latest version of the book from the catalog corresponding to the specified book id.
      * Throws a BookNotFoundException if the latest version is not active or no version is found.
-     * @param bookId Id associated with the book.
+     * @param bookId ID associated with the book.
      * @return The corresponding CatalogItem from the catalog table.
      */
     public CatalogItemVersion getBookFromCatalog(String bookId) {
@@ -42,8 +42,47 @@ public class CatalogDao {
         return book;
     }
 
+
     /**
-     * Sets the Catalog item corresponding to the provided bookId as inactive, thus removing it from the catalog
+     * Adds the provided KindleFormattedBook to the catalog.
+     * Will be added as a new book or the newest version if the book was previously published.
+     * Throws {@link BookNotFoundException} if trying to update a book that does not exist in the catalog.
+     * @param formattedBook The properly formatted book to be published to the catalog
+     * @return The newly published version of the book
+     */
+    public CatalogItemVersion createOrUpdateBook(KindleFormattedBook formattedBook) {
+        String bookId = formattedBook.getBookId();
+        int versionNumber;
+
+        if (bookId == null) {
+            bookId = KindlePublishingUtils.generateBookId();
+            versionNumber = 1;
+        } else {
+            validateBookExists(formattedBook.getBookId());
+            CatalogItemVersion currentVersion = getLatestVersionOfBook(bookId);
+            versionNumber = currentVersion.getVersion() + 1;
+            removeBookFromCatalog(bookId);
+        }
+
+        CatalogItemVersion newVersion = new CatalogItemVersion();
+        newVersion.setBookId(bookId);
+        newVersion.setVersion(versionNumber);
+        newVersion.setTitle(formattedBook.getTitle());
+        newVersion.setAuthor(formattedBook.getAuthor());
+        newVersion.setText(formattedBook.getText());
+        newVersion.setGenre(formattedBook.getGenre());
+        newVersion.setInactive(false);
+        saveBookInCatalog(newVersion);
+
+        return newVersion;
+    }
+
+    private void saveBookInCatalog(CatalogItemVersion bookToSave) {
+        dynamoDbMapper.save(bookToSave);
+    }
+
+    /**
+     * Sets the catalog item corresponding to the provided bookId as inactive, thus removing it from the catalog.
      * Throws a BookNotFoundException if there is no active version for the bookId provided
      * @param bookId the ID of the book that is to be removed
      * @return The CatalogItem marked as inactive
@@ -51,11 +90,7 @@ public class CatalogDao {
     public CatalogItemVersion removeBookFromCatalog(String bookId) {
         CatalogItemVersion bookToRemove;
 
-        try {
-            bookToRemove = getBookFromCatalog(bookId);
-        } catch (BookNotFoundException exception) {
-            throw exception;
-        }
+        bookToRemove = getBookFromCatalog(bookId);
 
         bookToRemove.setInactive(true);
         dynamoDbMapper.save(bookToRemove);
@@ -64,8 +99,9 @@ public class CatalogDao {
     }
 
     /**
-     * Checks to ensure a Book exists in the Catalog corresponding to the provided Id.
+     * Checks to ensure a Book corresponding to the provided ID exists in the catalog.
      * Does not check whether book is active or inactive.
+     * Throws a BookNotFoundException if no book was found with the provided ID.
      * @param bookId ID to search for in the catalog
      */
     public void validateBookExists(String bookId) {
